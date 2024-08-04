@@ -11,6 +11,7 @@
 /[Uu]ser[Ss]ettings/
 
 
+
 **/[Tt]extMesh [Pp]ro/
 **/[Pp]refabs/
 **/[Ss]cenes/
@@ -20,6 +21,7 @@
 **/[Pp]rojectSettings
 **/[Rr]oboto_[Mm]ono/
 **/[Ss]cenes/
+**/.csproj/
 /.vscode/
 
 
