@@ -6,8 +6,8 @@ public class BoardUI : MonoBehaviour
 {
     public Material squareMaterial;
     float BoardOffset = 3.5f;
-    public Color lightCol = new Color(143f / 255f, 216f / 255f, 216f / 255f); // Normalized color values
-    public Color darkCol = new Color(48f / 255f, 119f / 255f, 119f / 255f);   // Normalized color values
+    public Color lightCol = new Color(143f / 255f, 216f / 255f, 216f / 255f);
+    public Color darkCol = new Color(48f / 255f, 119f / 255f, 119f / 255f);
     private Dictionary<int, string> fileNames = new Dictionary<int, string>(){
         {0, "A"},
         {1, "B"},
@@ -57,6 +57,8 @@ public class BoardUI : MonoBehaviour
                 //InnerRenderer.material = squareMaterial;
                 renderer.material.color = (file + rank) % 2 == 0 ? lightCol : darkCol;
                 //InnerRenderer.material.color = Color.clear;
+
+                // Pieces.BPawn(new Vector3(file - BoardOffset, rank - BoardOffset, 0));
 
                 // Add collider to square
                 BoxCollider collider = square.AddComponent<BoxCollider>();
