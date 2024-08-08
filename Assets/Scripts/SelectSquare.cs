@@ -11,7 +11,7 @@ public class SelectSquare : MonoBehaviour
     void Start()
     {
         originalColor = GetComponent<MeshRenderer>().material.color;
-        transparentColor = new Color(originalColor.r, originalColor.g, originalColor.b, 0.6f); // Adjust the alpha value to make it less opaque
+        transparentColor = new Color(originalColor.r, originalColor.g, originalColor.b, 0.6f);
     }
 
     // Update is called once per frame
@@ -22,18 +22,18 @@ public class SelectSquare : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        Debug.Log($"Mouse entered {gameObject.name}");
+        //Debug.Log($"Mouse entered {gameObject.name}");
         GetComponent<MeshRenderer>().material.color = transparentColor;
     }
 
     private void OnMouseExit()
     {
-        Debug.Log($"Mouse exited {gameObject.name}");
+        //Debug.Log($"Mouse exited {gameObject.name}");
         GetComponent<MeshRenderer>().material.color = originalColor;
     }
 
     private void OnMouseDown()
     {
-        Debug.Log($"Mouse clicked {gameObject.name}");
+        //Debug.Log($"Mouse clicked {gameObject.name}");
     }
 }
