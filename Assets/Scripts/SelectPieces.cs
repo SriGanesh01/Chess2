@@ -21,6 +21,10 @@ public class SelectPieces : MonoBehaviour
         Debug.Log($"Mouse clicked {gameObject.name}");
     }
 
+    private void OnMouseDrag() {
+        
+    }
+
     private void OnMouseEnter()
     {
         Debug.Log($"Mouse entered {gameObject.name}");

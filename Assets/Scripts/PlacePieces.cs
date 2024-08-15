@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlacePieces : MonoBehaviour
 {
-    private string StartingFEN = "2R3B1/4K3/2pN4/1N2kppb/7p/n2p2P1/5P2/1n5Q";
+    private string StartingFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     public Pieces Pieces;
 
