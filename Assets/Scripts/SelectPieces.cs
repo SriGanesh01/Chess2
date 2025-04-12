@@ -16,22 +16,28 @@ public class SelectPieces : MonoBehaviour
         
     }
 
-    private void OnMouseDown()
+    void OnMouseEnter()
     {
-        Debug.Log($"Mouse clicked {gameObject.name}");
+        // Debug.Log("Mouse Entered Piece: " + gameObject.name);
+        // Debug.Log("Mouse Entered Piece: " + gameObject.transform.position);
     }
 
-    private void OnMouseDrag() {
-        
+    /// <summary>
+    /// OnMouseDrag is called when the user has clicked on a GUIElement or Collider
+    /// and is still holding down the mouse.
+    /// </summary>
+    void OnMouseDrag()
+    {
+        Debug.Log("Dragging" + gameObject.name);
+        Vector3 mousePosition = Input.mousePosition;
+        float z = transform.position.z;
+        Vector3 screenPoint = Camera.main.ScreenToWorldPoint(mousePosition);
+        transform.position = new Vector3(screenPoint.x, screenPoint.y, z);
     }
 
-    private void OnMouseEnter()
+    void OnMouseUp()
     {
-        Debug.Log($"Mouse entered {gameObject.name}");
-    }
-
-    private void OnMouseExit()
-    {
-        Debug.Log($"Mouse exited {gameObject.name}");
+        Debug.Log("Clicked on: " + gameObject.name);
+        transform.position = new Vector3(Mathf.Floor(transform.position.x) + 0.5f, Mathf.Floor(transform.position.y) +0.5f, transform.position.z);
     }
 }
