@@ -4,23 +4,10 @@ using UnityEngine;
 
 public class SelectSquare : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     void OnMouseEnter()
     {
         // Debug.Log("Mouse Entered Square: " + gameObject.name);
         // Debug.Log("Mouse Entered Square: " + gameObject.transform.position);
     }
-
     
 }

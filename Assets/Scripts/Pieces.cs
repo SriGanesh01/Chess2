@@ -42,6 +42,15 @@ public class Pieces : MonoBehaviour
             whitePawn.GetComponent<PieceInfo>().pieceType = "Pawn";
         }
 
+        if (whitePawn.GetComponent<MovePiece>() == null)
+        {
+            whitePawn.AddComponent<MovePiece>();
+        }
+
+        if (whitePawn.GetComponent<Rules>() == null)
+        {
+            whitePawn.AddComponent<Rules>();
+        }
     }
 
     public void WRook(Vector3 pos)
@@ -57,6 +66,16 @@ public class Pieces : MonoBehaviour
             whiteRook.AddComponent<PieceInfo>();
             whiteRook.GetComponent<PieceInfo>().pieceColour = "White";
             whiteRook.GetComponent<PieceInfo>().pieceType = "Rook";
+        }
+
+        if (whiteRook.GetComponent<MovePiece>() == null)
+        {
+            whiteRook.AddComponent<MovePiece>();
+        }
+
+        if (whiteRook.GetComponent<Rules>() == null)
+        {
+            whiteRook.AddComponent<Rules>();
         }
     }
 
@@ -74,6 +93,16 @@ public class Pieces : MonoBehaviour
             whiteKnight.GetComponent<PieceInfo>().pieceColour = "White";
             whiteKnight.GetComponent<PieceInfo>().pieceType = "Knight";
         }
+
+        if (whiteKnight.GetComponent<MovePiece>() == null)
+        {
+            whiteKnight.AddComponent<MovePiece>();
+        }
+
+        if (whiteKnight.GetComponent<Rules>() == null)
+        {
+            whiteKnight.AddComponent<Rules>();
+        }
     }
 
     public void WBishop(Vector3 pos)
@@ -89,6 +118,16 @@ public class Pieces : MonoBehaviour
             whiteBishop.AddComponent<PieceInfo>();
             whiteBishop.GetComponent<PieceInfo>().pieceColour = "White";
             whiteBishop.GetComponent<PieceInfo>().pieceType = "Bishop";
+        }
+
+        if (whiteBishop.GetComponent<MovePiece>() == null)
+        {
+            whiteBishop.AddComponent<MovePiece>();
+        }
+
+        if (whiteBishop.GetComponent<Rules>() == null)
+        {
+            whiteBishop.AddComponent<Rules>();
         }
     }
 
@@ -106,6 +145,16 @@ public class Pieces : MonoBehaviour
             whiteQueen.GetComponent<PieceInfo>().pieceColour = "White";
             whiteQueen.GetComponent<PieceInfo>().pieceType = "Queen";
         }
+
+        if (whiteQueen.GetComponent<MovePiece>() == null)
+        {
+            whiteQueen.AddComponent<MovePiece>();
+        }
+
+        if (whiteQueen.GetComponent<Rules>() == null)
+        {
+            whiteQueen.AddComponent<Rules>();
+        }
     }
 
     public void WKing(Vector3 pos)
@@ -121,6 +170,16 @@ public class Pieces : MonoBehaviour
             whiteKing.AddComponent<PieceInfo>();
             whiteKing.GetComponent<PieceInfo>().pieceColour = "White";
             whiteKing.GetComponent<PieceInfo>().pieceType = "King";
+        }
+
+        if (whiteKing.GetComponent<MovePiece>() == null)
+        {
+            whiteKing.AddComponent<MovePiece>();
+        }
+
+        if (whiteKing.GetComponent<Rules>() == null)
+        {
+            whiteKing.AddComponent<Rules>();
         }
     }
 
@@ -138,6 +197,16 @@ public class Pieces : MonoBehaviour
             blackPawn.GetComponent<PieceInfo>().pieceColour = "Black";
             blackPawn.GetComponent<PieceInfo>().pieceType = "Pawn";
         }
+
+        if (blackPawn.GetComponent<MovePiece>() == null)
+        {
+            blackPawn.AddComponent<MovePiece>();
+        }
+
+        if (blackPawn.GetComponent<Rules>() == null)
+        {
+            blackPawn.AddComponent<Rules>();
+        }
     }
 
     public void BRook(Vector3 pos)
@@ -153,6 +222,16 @@ public class Pieces : MonoBehaviour
             blackRook.AddComponent<PieceInfo>();
             blackRook.GetComponent<PieceInfo>().pieceColour = "Black";
             blackRook.GetComponent<PieceInfo>().pieceType = "Rook";
+        }
+
+        if (blackRook.GetComponent<MovePiece>() == null)
+        {
+            blackRook.AddComponent<MovePiece>();
+        }
+
+        if (blackRook.GetComponent<Rules>() == null)
+        {
+            blackRook.AddComponent<Rules>();
         }
     }
 
@@ -170,6 +249,16 @@ public class Pieces : MonoBehaviour
             blackKnight.GetComponent<PieceInfo>().pieceColour = "Black";
             blackKnight.GetComponent<PieceInfo>().pieceType = "Knight";
         }
+
+        if (blackKnight.GetComponent<MovePiece>() == null)
+        {
+            blackKnight.AddComponent<MovePiece>();
+        }
+
+        if (blackKnight.GetComponent<Rules>() == null)
+        {
+            blackKnight.AddComponent<Rules>();
+        }
     }
 
     public void BBishop(Vector3 pos)
@@ -185,6 +274,16 @@ public class Pieces : MonoBehaviour
             blackBishop.AddComponent<PieceInfo>();
             blackBishop.GetComponent<PieceInfo>().pieceColour = "Black";
             blackBishop.GetComponent<PieceInfo>().pieceType = "Bishop";
+        }
+
+        if (blackBishop.GetComponent<MovePiece>() == null)
+        {
+            blackBishop.AddComponent<MovePiece>();
+        }
+
+        if (blackBishop.GetComponent<Rules>() == null)
+        {
+            blackBishop.AddComponent<Rules>();
         }
     }
 
@@ -202,6 +301,16 @@ public class Pieces : MonoBehaviour
             blackQueen.GetComponent<PieceInfo>().pieceColour = "Black";
             blackQueen.GetComponent<PieceInfo>().pieceType = "Queen";
         }
+
+        if (blackQueen.GetComponent<MovePiece>() == null)
+        {
+            blackQueen.AddComponent<MovePiece>();
+        }
+
+        if (blackQueen.GetComponent<Rules>() == null)
+        {
+            blackQueen.AddComponent<Rules>();
+        }
     }
 
     public void BKing(Vector3 pos)
@@ -217,6 +326,16 @@ public class Pieces : MonoBehaviour
             blackKing.AddComponent<PieceInfo>();
             blackKing.GetComponent<PieceInfo>().pieceColour = "Black";
             blackKing.GetComponent<PieceInfo>().pieceType = "King";
+        }
+
+        if (blackKing.GetComponent<MovePiece>() == null)
+        {
+            blackKing.AddComponent<MovePiece>();
+        }
+
+        if (blackKing.GetComponent<Rules>() == null)
+        {
+            blackKing.AddComponent<Rules>();
         }
     }
 
