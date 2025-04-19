@@ -115,7 +115,7 @@ public class MovePiece : MonoBehaviour
         else if (rules.IsBishop())
         {
             if (
-                    Mathf.Abs(Mathf.Floor(transform.position.x) + 0.5f - oldPosition.x) == Mathf.Abs(Mathf.Floor(transform.position.y) + 0.5f - oldPosition.y)
+                    (Mathf.Abs(Mathf.Floor(transform.position.x) + 0.5f - oldPosition.x) == Mathf.Abs(Mathf.Floor(transform.position.y) + 0.5f - oldPosition.y))
                 )
             {
                 transform.position = new Vector3(Mathf.Floor(transform.position.x) + 0.5f, Mathf.Floor(transform.position.y) + 0.5f, transform.position.z);
@@ -141,7 +141,7 @@ public class MovePiece : MonoBehaviour
                 transform.position = oldPosition;
             }
         }
-
+        
         else if (rules.IsKing())
         {
             if (
