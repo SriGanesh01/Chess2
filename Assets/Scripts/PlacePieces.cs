@@ -6,11 +6,13 @@ public class PlacePieces : MonoBehaviour
 {
     private string StartingFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+    public GlobalConstants globalConstants;
     public Pieces Pieces;
 
     // Start is called before the first frame update
     void Start()
     {
+        globalConstants = FindObjectOfType<GlobalConstants>();
         if (CheckIfFENIsRightLength())
         {
             PlacePiecesBasedOnFEN();
@@ -101,7 +103,7 @@ public class PlacePieces : MonoBehaviour
             {
                 char fenChar = FENRows[i][j];
 
-                Vector3 position = new Vector3(file - 3.5f, rows - 3.5f, 0);
+                Vector3 position = new Vector3(file - (globalConstants.boardSize - 1) / 2f, rows - (globalConstants.boardSize - 1) / 2f, 0);
                 switch (fenChar)
                 {
                     case 'P':
@@ -150,8 +152,6 @@ public class PlacePieces : MonoBehaviour
                     case '8':
                         file += (int)char.GetNumericValue(fenChar) - 1;
                         break;
-
-                    
                 }
                 file++;
             }

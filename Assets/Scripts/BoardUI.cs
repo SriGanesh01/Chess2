@@ -5,41 +5,36 @@ using UnityEngine;
 public class BoardUI : MonoBehaviour
 {
     public Material squareMaterial;
-    float BoardOffset = 3.5f;
+    public GlobalConstants globalConstants;
+    float BoardOffset;
     public Color lightCol = new Color(143f / 255f, 216f / 255f, 216f / 255f);
     public Color darkCol = new Color(48f / 255f, 119f / 255f, 119f / 255f);
-    private Dictionary<int, string> fileNames = new Dictionary<int, string>(){
-        {0, "A"},
-        {1, "B"},
-        {2, "C"},
-        {3, "D"},
-        {4, "E"},
-        {5, "F"},
-        {6, "G"},
-        {7, "H"}
-    };
+    private Dictionary<int, string> fileNames = new Dictionary<int, string>();
 
     private void Awake() {
+        globalConstants = FindObjectOfType<GlobalConstants>();
+        BoardOffset = (globalConstants.boardSize - 1) / 2f;
+        GenerateFileNames();
         CreateBoard();
     }
 
-    // Start is called before the first frame update
-    void Start()
+    void GenerateFileNames()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        fileNames.Clear();
+        while (fileNames.Count < globalConstants.boardSize)
+        {
+            for (int i = 0; i < globalConstants.boardSize; i++)
+            {
+                fileNames.Add(i, ((char)('A' + i)).ToString());
+            }
+        }
     }
 
     void CreateBoard()
     {
-        for (int rank = 0; rank < 8; rank++)
+        for (int rank = 0; rank < globalConstants.boardSize; rank++)
         {
-            for (int file = 0; file < 8; file++)
+            for (int file = 0; file < globalConstants.boardSize; file++)
             {
                 // Create square
                 GameObject square = GameObject.CreatePrimitive(PrimitiveType.Quad);
