@@ -4,9 +4,20 @@ using UnityEngine;
 
 public class SelectPieces : MonoBehaviour
 {
-    void OnMouseEnter()
+    public GlobalConstants globalConstants;
+    public bool isSelected = true;
+
+    private void Start() {
+        globalConstants = FindObjectOfType<GlobalConstants>();
+    }
+    void OnMouseDown()
     {
-        // Debug.Log("Mouse Entered Piece: " + gameObject.name);
-        // Debug.Log("Mouse Entered Piece: " + gameObject.transform.position);
+        globalConstants.PiecesPrefab = gameObject;
+        isSelected = true;
+    }
+
+    void OnMouseUp()
+    {
+        isSelected = false;
     }
 }

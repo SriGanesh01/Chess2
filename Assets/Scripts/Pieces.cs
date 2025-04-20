@@ -23,13 +23,18 @@ public class Pieces : MonoBehaviour
     public GameObject moveables;
 
     public BoardUI boardUI;
-    public SelectPieces selectPieces;
+    public AllPiecesData allPiecesData;
 
-    // public SpriteRenderer sr;
-
+    private void Start() {
+        allPiecesData = FindObjectOfType<AllPiecesData>();
+    }
+    
     public void WPawn(Vector3 pos)
     {
         Instantiate(whitePawn, pos, Quaternion.identity);
+        whitePawn.tag = "Pieces";
+        allPiecesData.allPieces.Add(whitePawn);
+        // allPiecesData.allPiecesData.Add(whitePawn, pos);
         if (whitePawn.GetComponent<SelectPieces>() == null)
         {
             whitePawn.AddComponent<SelectPieces>();
@@ -56,6 +61,9 @@ public class Pieces : MonoBehaviour
     public void WRook(Vector3 pos)
     {
         Instantiate(whiteRook, pos, Quaternion.identity);
+        whiteRook.tag = "Pieces";
+        allPiecesData.allPieces.Add(whiteRook);
+        // allPiecesData.allPiecesData.Add(whiteRook, pos);
         if (whiteRook.GetComponent<SelectPieces>() == null)
         {
             whiteRook.AddComponent<SelectPieces>();
@@ -82,6 +90,9 @@ public class Pieces : MonoBehaviour
     public void WKnight(Vector3 pos)
     {
         Instantiate(whiteKnight, pos, Quaternion.identity);
+        whiteKnight.tag = "Pieces";
+        allPiecesData.allPieces.Add(whiteKnight);
+        // allPiecesData.allPiecesData.Add(whiteKnight, pos);
         if (whiteKnight.GetComponent<SelectPieces>() == null)
         {
             whiteKnight.AddComponent<SelectPieces>();
@@ -108,6 +119,9 @@ public class Pieces : MonoBehaviour
     public void WBishop(Vector3 pos)
     {
         Instantiate(whiteBishop, pos, Quaternion.identity);
+        whiteBishop.tag = "Pieces";
+        allPiecesData.allPieces.Add(whiteBishop);
+        // allPiecesData.allPiecesData.Add(whiteBishop, pos);
         if (whiteBishop.GetComponent<SelectPieces>() == null)
         {
             whiteBishop.AddComponent<SelectPieces>();
@@ -134,6 +148,9 @@ public class Pieces : MonoBehaviour
     public void WQueen(Vector3 pos)
     {
         Instantiate(whiteQueen, pos, Quaternion.identity);
+        whiteQueen.tag = "Pieces";
+        allPiecesData.allPieces.Add(whiteQueen);
+        // allPiecesData.allPiecesData.Add(whiteQueen, pos);
         if (whiteQueen.GetComponent<SelectPieces>() == null)
         {
             whiteQueen.AddComponent<SelectPieces>();
@@ -160,6 +177,9 @@ public class Pieces : MonoBehaviour
     public void WKing(Vector3 pos)
     {
         Instantiate(whiteKing, pos, Quaternion.identity);
+        whiteKing.tag = "Pieces";
+        allPiecesData.allPieces.Add(whiteKing);
+        // allPiecesData.allPiecesData.Add(whiteKing, pos);
         if (whiteKing.GetComponent<SelectPieces>() == null)
         {
             whiteKing.AddComponent<SelectPieces>();
@@ -186,6 +206,9 @@ public class Pieces : MonoBehaviour
     public void BPawn(Vector3 pos)
     {
         Instantiate(blackPawn, pos, Quaternion.identity);
+        blackPawn.tag = "Pieces";
+        allPiecesData.allPieces.Add(blackPawn);
+        // allPiecesData.allPiecesData.Add(blackPawn, pos);
         if (blackPawn.GetComponent<SelectPieces>() == null)
         {
             blackPawn.AddComponent<SelectPieces>();
@@ -212,6 +235,9 @@ public class Pieces : MonoBehaviour
     public void BRook(Vector3 pos)
     {
         Instantiate(blackRook, pos, Quaternion.identity);
+        blackRook.tag = "Pieces";
+        allPiecesData.allPieces.Add(blackRook);
+        // allPiecesData.allPiecesData.Add(blackRook, pos);
         if (blackRook.GetComponent<SelectPieces>() == null)
         {
             blackRook.AddComponent<SelectPieces>();
@@ -238,6 +264,9 @@ public class Pieces : MonoBehaviour
     public void BKnight(Vector3 pos)
     {
         Instantiate(blackKnight, pos, Quaternion.identity);
+        blackKnight.tag = "Pieces";
+        allPiecesData.allPieces.Add(blackKnight);
+        // allPiecesData.allPiecesData.Add(blackKnight, pos);
         if (blackKnight.GetComponent<SelectPieces>() == null)
         {
             blackKnight.AddComponent<SelectPieces>();
@@ -264,6 +293,9 @@ public class Pieces : MonoBehaviour
     public void BBishop(Vector3 pos)
     {
         Instantiate(blackBishop, pos, Quaternion.identity);
+        blackBishop.tag = "Pieces";
+        allPiecesData.allPieces.Add(blackBishop);
+        // allPiecesData.allPiecesData.Add(blackBishop, pos);
         if (blackBishop.GetComponent<SelectPieces>() == null)
         {
             blackBishop.AddComponent<SelectPieces>();
@@ -290,6 +322,9 @@ public class Pieces : MonoBehaviour
     public void BQueen(Vector3 pos)
     {
         Instantiate(blackQueen, pos, Quaternion.identity);
+        blackQueen.tag = "Pieces";
+        allPiecesData.allPieces.Add(blackQueen);
+        // allPiecesData.allPiecesData.Add(blackQueen, pos);
         if (blackQueen.GetComponent<SelectPieces>() == null)
         {
             blackQueen.AddComponent<SelectPieces>();
@@ -316,6 +351,9 @@ public class Pieces : MonoBehaviour
     public void BKing(Vector3 pos)
     {
         Instantiate(blackKing, pos, Quaternion.identity);
+        blackKing.tag = "Pieces";
+        allPiecesData.allPieces.Add(blackKing);
+        // allPiecesData.allPiecesData.Add(blackKing, pos);
         if (blackKing.GetComponent<SelectPieces>() == null)
         {
             blackKing.AddComponent<SelectPieces>();
@@ -345,8 +383,6 @@ public class Pieces : MonoBehaviour
 
     public void Moveables(Vector3 pos)
     {
-
-
         GameObject moveable = Instantiate(Circle, pos, Quaternion.identity);
         moveable.transform.parent = moveables.transform;
 

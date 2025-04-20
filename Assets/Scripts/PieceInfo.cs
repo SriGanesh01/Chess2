@@ -6,16 +6,9 @@ public class PieceInfo : MonoBehaviour
 {
     public string pieceColour;
     public string pieceType;
+    public Vector3 piecePosition;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+    private void Start() {
+        piecePosition = transform.position;
     }
 }
