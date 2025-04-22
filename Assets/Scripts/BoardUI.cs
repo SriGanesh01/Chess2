@@ -61,6 +61,7 @@ public class BoardUI : MonoBehaviour
 
                 // Add the Square component
                 square.AddComponent<SelectSquare>();
+                square.AddComponent<SquareInfo>();
             }
         }
     }

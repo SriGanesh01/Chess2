@@ -15,8 +15,13 @@ public class MovePiece : MonoBehaviour
         rules = GetComponent<Rules>();
     }
 
+    public void Update() {
+        
+    }
+
     private void OnMouseDown()
     {
+        globalConstants.CalculateAllValidLocationsAndStore(this.gameObject, globalConstants.allValidLocations);
         oldPosition = transform.position;
     }
 
@@ -31,5 +36,7 @@ public class MovePiece : MonoBehaviour
     void OnMouseUp()
     {
         globalConstants.ValidateAndMove(this.gameObject, oldPosition);
+        globalConstants.MoveablePiecesUpdated();
+        globalConstants.CalculateAllValidLocationsAndStore(this.gameObject, globalConstants.allValidLocations);
     }
 }
