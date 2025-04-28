@@ -7,7 +7,7 @@ public class MovePiece : MonoBehaviour
     public Rules rules;
     public GlobalConstants globalConstants;
 
-    Vector3 oldPosition;
+    private Vector3 oldPosition;
 
     void Start()
     {
@@ -15,28 +15,62 @@ public class MovePiece : MonoBehaviour
         rules = GetComponent<Rules>();
     }
 
-    public void Update() {
-        
-    }
-
     private void OnMouseDown()
     {
-        globalConstants.CalculateAllValidLocationsAndStore(this.gameObject, globalConstants.allValidLocations);
+        if (globalConstants.IsGameOver) return;
+
+        PieceInfo pieceInfo = GetComponent<PieceInfo>();
+        if ((pieceInfo.pieceColour == "White" && !globalConstants.IsWhitesTurn) ||
+            (pieceInfo.pieceColour == "Black" && globalConstants.IsWhitesTurn))
+        {
+            return;
+        }
+
         oldPosition = transform.position;
     }
 
-    void OnMouseDrag()
+    private void OnMouseDrag()
     {
+        if (globalConstants.IsGameOver) return;
+
         Vector3 mousePosition = Input.mousePosition;
-        float z = transform.position.z;
-        Vector3 screenPoint = Camera.main.ScreenToWorldPoint(mousePosition);
-        transform.position = new Vector3(screenPoint.x, screenPoint.y, z);
+        mousePosition.z = Camera.main.WorldToScreenPoint(transform.position).z;
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
+
+        transform.position = new Vector3(worldPosition.x, worldPosition.y, oldPosition.z);
     }
 
-    void OnMouseUp()
+    private void OnMouseUp()
     {
-        globalConstants.ValidateAndMove(this.gameObject, oldPosition);
-        globalConstants.MoveablePiecesUpdated();
-        globalConstants.CalculateAllValidLocationsAndStore(this.gameObject, globalConstants.allValidLocations);
+        if (globalConstants.IsGameOver) return;
+
+        Vector3 nearestSquare = FindNearestSquare(transform.position);
+
+        if (globalConstants.IsValidMove(this.gameObject, oldPosition, nearestSquare))
+        {
+            globalConstants.ValidateAndMove(this.gameObject, oldPosition, nearestSquare);
+            globalConstants.UpdateMoveablePieces();
+        }
+        else
+        {
+            transform.position = oldPosition;
+        }
+    }
+
+    Vector3 FindNearestSquare(Vector3 currentPos)
+    {
+        float closestDistance = float.MaxValue;
+        Vector3 closestSquare = oldPosition;
+
+        foreach (SquareInfo square in FindObjectsOfType<SquareInfo>())
+        {
+            float dist = Vector3.Distance(currentPos, square.transform.position);
+            if (dist < closestDistance)
+            {
+                closestDistance = dist;
+                closestSquare = square.transform.position;
+            }
+        }
+        return closestSquare;
     }
 }

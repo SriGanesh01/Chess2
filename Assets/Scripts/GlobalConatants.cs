@@ -11,483 +11,327 @@ public class GlobalConstants : MonoBehaviour
     public List<Vector3> allValidLocations = new List<Vector3>();
     public List<GameObject> allValidPieces = new List<GameObject>();
 
-    // public List<GameObject> allRobotValidPieces = new List<GameObject>();
-    // public List<Vector3> allRobotValidLocations = new List<Vector3>();
-    
-
     public GameObject PiecesPrefab;
     public PieceInfo pieceInfo;
-    // public SquareInfo squareInfo;
-    // public Pieces Pieces;
     public AllPiecesData allPiecesData;
 
-    public GameObject randomPiece;
-    public Vector3 randomLocation;
+    private GameObject randomPiece;
+    private Vector3 randomLocation;
+
+    private bool botIsMoving = false;
 
     IEnumerator Start()
     {
-        yield return new WaitForSeconds(0.1f); // small delay
-        MoveablePiecesUpdated();
-        
-    }
-
-    IEnumerator MakeRandomMove()
-    {
         yield return new WaitForSeconds(0.1f);
-        ValidateAndMoveBot(randomPiece, randomPiece.transform.position, randomLocation);
-        MoveablePiecesUpdated();
-        CalculateAllValidLocationsAndStore(randomPiece, allValidLocations);
+        UpdateMoveablePieces();
     }
 
-    public void Update() {
+    void Update()
+    {
+        if (!IsGameOver && !IsWhitesTurn && !botIsMoving)
+        {
+            StartCoroutine(BotMove());
+        }
+    }
+
+    IEnumerator BotMove()
+    {
+        botIsMoving = true;
+
+        yield return new WaitForSeconds(0.3f); // slight delay to "think"
+
         GetRandomMoveablePiece();
+        if (randomPiece == null)
+        {
+            botIsMoving = false;
+            yield break;
+        }
+
         GetRandomValidLocation(randomPiece);
-        StartCoroutine(MakeRandomMove());
+        if (randomLocation == Vector3.zero)
+        {
+            botIsMoving = false;
+            yield break;
+        }
+
+        yield return new WaitForSeconds(0.3f);
+
+        // Validate if the move is blocked
+        if (IsBlocked(randomPiece, randomPiece.transform.position, randomLocation))
+        {
+            botIsMoving = false;
+            yield break;
+        }
+
+        ValidateAndMove(randomPiece, randomPiece.transform.position, randomLocation);
+
+        yield return new WaitForSeconds(0.2f); // wait before next bot move
+        UpdateMoveablePieces();
+
+        botIsMoving = false;
     }
 
-    public void GetRandomMoveablePiece()
+    void GetRandomMoveablePiece()
     {
         if (allValidPieces.Count > 0)
-        {
             randomPiece = allValidPieces[Random.Range(0, allValidPieces.Count)];
-        }
     }
 
-    public void GetRandomValidLocation(GameObject piece)
+    void GetRandomValidLocation(GameObject piece)
     {
-        List<Vector3> validLocations = new List<Vector3>();
-        CalculateAllValidLocationsAndStore(piece, validLocations);
+        List<Vector3> validLocations = GetValidLocations(piece);
         if (validLocations.Count > 0)
-        {
             randomLocation = validLocations[Random.Range(0, validLocations.Count)];
-            Debug.Log("Random Location: " + randomLocation);
-        }
-        else
-        {
-            Debug.Log("No valid locations for the piece");
-        }
     }
 
-    public void MoveablePiecesUpdated()
+    public void UpdateMoveablePieces()
     {
         allValidPieces.Clear();
-        foreach (PieceInfo pieces in FindObjectsOfType<PieceInfo>())
+        foreach (PieceInfo piece in FindObjectsOfType<PieceInfo>())
         {
-            Debug.Log("Piece: " + pieces.gameObject.name + " Position: " + pieces.piecePosition);
-            if (HasValidLocationsCheck(pieces.gameObject))
+            if (piece.pieceColour == (IsWhitesTurn ? "White" : "Black"))
             {
-                allValidPieces.Add(pieces.gameObject);
+                if (GetValidLocations(piece.gameObject).Count > 0)
+                    allValidPieces.Add(piece.gameObject);
             }
         }
     }
 
-    public bool HasValidLocationsCheck(GameObject SelcPic)
+    List<Vector3> GetValidLocations(GameObject piece)
     {
-        GameObject selectedPiece = SelcPic;
+        List<Vector3> validLocs = new List<Vector3>();
 
         foreach (SquareInfo square in FindObjectsOfType<SquareInfo>())
         {
             Vector3 squarePos = square.transform.position;
+            if (IsValidMove(piece, piece.transform.position, squarePos))
+                validLocs.Add(squarePos);
+        }
+        return validLocs;
+    }
 
-            if (ValidateBool(selectedPiece, selectedPiece.transform.position, squarePos))
+    public bool IsValidMove(GameObject piece, Vector3 fromPos, Vector3 toPos)
+    {
+        if (!IsInsideBoard(toPos)) return false;
+
+        PieceInfo pieceInfo = piece.GetComponent<PieceInfo>();
+
+        if ((pieceInfo.pieceColour == "White" && !IsWhitesTurn) ||
+            (pieceInfo.pieceColour == "Black" && IsWhitesTurn))
+            return false;
+
+        if (pieceInfo.piecePosition == toPos)
+            return false; // Can't move to same position
+
+        if (!MoveRules(piece, fromPos, toPos)) return false;
+        if (IsBlocked(piece, fromPos, toPos)) return false;
+
+        // Prevent capturing own color
+        if (IsFriendlyAt(toPos, pieceInfo.pieceColour)) return false;
+
+        if (WouldCauseCheck(piece, fromPos, toPos)) return false;
+
+        return true;
+    }
+
+    bool MoveRules(GameObject piece, Vector3 from, Vector3 to)
+    {
+        Rules rules = piece.GetComponent<Rules>();
+        PieceInfo info = piece.GetComponent<PieceInfo>();
+
+        float dx = Mathf.Round(to.x - from.x);
+        float dy = Mathf.Round(to.y - from.y);
+
+        if (rules.IsWhitePawn())
+        {
+            if (dx == 0) // Moving forward
+            {
+                if (dy == 1 && !IsPieceAt(to)) return true;
+                if (dy == 2 && Mathf.Floor(from.y) == 1 && !IsPieceAt(to) && !IsPieceAt(from + Vector3.up))
+                    return true;
+            }
+            else if (Mathf.Abs(dx) == 1 && dy == 1 && IsEnemyAt(to, info.pieceColour)) // Capturing diagonally
             {
                 return true;
             }
-            // return false;
-        }
-        return false;
-    }
-
-    public void CalculateAllValidLocationsAndStore(GameObject SelcPic, List<Vector3> Locs)
-    {
-        Locs.Clear();
-        // allValidPieces.Clear();
-        GameObject selectedPiece = SelcPic;
-
-        foreach (SquareInfo square in FindObjectsOfType<SquareInfo>())
-        {
-            Vector3 squarePos = square.transform.position;
-
-            if (ValidateBool(selectedPiece, selectedPiece.transform.position, squarePos))
-            {
-                Locs.Add(squarePos);
-                // return true;
-            }
-            // return false;
-        }
-        // return false;
-    }
-
-
-    public bool ValidateBool(GameObject piece, Vector3 oldPosition, Vector3 targPos)
-    {
-        Vector3 currentPos = piece.transform.position;
-        Rules rules = piece.GetComponent<Rules>();
-        pieceInfo = piece.GetComponent<PieceInfo>();
-        Vector3 targetPosition = targPos;
-        bool validMove = true;
-        bool isBounded = true;
-
-
-
-        float dx = targetPosition.x - oldPosition.x;
-        float dy = targetPosition.y - oldPosition.y;
-
-        if (Mathf.Abs(targetPosition.x) <= (boardSize) / 2 && Mathf.Abs(targetPosition.y) <= (boardSize) / 2)
-        {
-            isBounded = true;
-        }
-        else
-        {
-            isBounded = false;
-        }
-
-        if (rules.IsWhitePawn())
-        {
-            bool isCapturing = false;
-            foreach (PieceInfo other in FindObjectsOfType<PieceInfo>())
-            {
-                if (other.pieceColour != pieceInfo.pieceColour && other.piecePosition == targetPosition)
-                {
-                    isCapturing = true;
-                    break;
-                }
-            }
-
-            validMove = (dx == 0 && (dy == 1 || (Mathf.Floor(oldPosition.y) == 1 && dy == 2))) ||
-                        (Mathf.Abs(dx) == 1 && dy == 1 && isCapturing);
-        }
-
-        else if (rules.IsBlackPawn())
-        {
-            bool isCapturing = false;
-            foreach (PieceInfo other in FindObjectsOfType<PieceInfo>())
-            {
-                if (other.pieceColour != pieceInfo.pieceColour && other.piecePosition == targetPosition)
-                {
-                    isCapturing = true;
-                    break;
-                }
-            }
-
-            validMove = (dx == 0 && (dy == -1 || (Mathf.Floor(oldPosition.y) == 6 && dy == -2))) ||
-                        (Mathf.Abs(dx) == 1 && dy == -1 && isCapturing);
-        }
-
-        else if (rules.IsKnight())
-        {
-            validMove = (Mathf.Abs(dx) == 2 && Mathf.Abs(dy) == 1) || (Mathf.Abs(dx) == 1 && Mathf.Abs(dy) == 2);
-        }
-        else if (rules.IsRook())
-        {
-            validMove = (dx == 0 && dy != 0) || (dy == 0 && dx != 0);
-        }
-        else if (rules.IsBishop())
-        {
-            validMove = Mathf.Abs(dx) == Mathf.Abs(dy);
-        }
-        else if (rules.IsQueen())
-        {
-            validMove = Mathf.Abs(dx) == Mathf.Abs(dy) || (dx == 0 && dy != 0) || (dy == 0 && dx != 0);
-        }
-        else if (rules.IsKing())
-        {
-            validMove = (Mathf.Abs(dx) <= 1 && Mathf.Abs(dy) <= 1 && (dx != 0 || dy != 0));
-        }
-
-        if (IsWhitesTurn && pieceInfo.pieceColour == "Black")
-        {
             return false;
         }
-        if (!IsWhitesTurn && pieceInfo.pieceColour == "White")
+        if (rules.IsBlackPawn())
         {
-            return false;
-        }
-
-        if (validMove && isBounded && !IsBlockingPiece(piece, targetPosition))
-        {
-            foreach (PieceInfo item in FindObjectsOfType<PieceInfo>())
+            if (dx == 0)
             {
-                if (item.piecePosition == targetPosition && item.pieceColour == pieceInfo.pieceColour)
-                {
-                    return false;
-                }
-                else if (item.piecePosition == targetPosition && item.pieceColour != pieceInfo.pieceColour)
-                {
+                if (dy == -1 && !IsPieceAt(to)) return true;
+                if (dy == -2 && Mathf.Floor(from.y) == 6 && !IsPieceAt(to) && !IsPieceAt(from + Vector3.down))
                     return true;
-                }
             }
-            return true;
-        }
-        else
-        {
+            else if (Mathf.Abs(dx) == 1 && dy == -1 && IsEnemyAt(to, info.pieceColour))
+            {
+                return true;
+            }
             return false;
         }
-    }
-
-    public void ValidateAndMoveBot(GameObject piece, Vector3 oldPosition, Vector3 targetPos)
-    {
-        Vector3 currentPos = piece.transform.position;
-        Rules rules = piece.GetComponent<Rules>();
-        PieceInfo pieceInfo = piece.GetComponent<PieceInfo>();
-        Vector3 targetPosition = targetPos;
-        bool validMove = true;
-        bool isBounded = true;
-
-
-
-        float dx = targetPosition.x - oldPosition.x;
-        float dy = targetPosition.y - oldPosition.y;
-
-        if (Mathf.Abs(targetPosition.x) <= (boardSize) / 2 && Mathf.Abs(targetPosition.y) <= (boardSize) / 2)
+        if (rules.IsKnight()) return (Mathf.Abs(dx) == 2 && Mathf.Abs(dy) == 1) || (Mathf.Abs(dx) == 1 && Mathf.Abs(dy) == 2);
+        if (rules.IsRook() || rules.IsBishop() || rules.IsQueen())
         {
-            isBounded = true;
+            // For linear pieces like Rook, Bishop, Queen, check for blocked paths
+            if (IsBlocked(piece, from, to)) return false;
         }
-        else
-        {
-            isBounded = false;
-        }
-
-        if (rules.IsWhitePawn())
-        {
-            bool isCapturing = false;
-            foreach (PieceInfo other in FindObjectsOfType<PieceInfo>())
-            {
-                if (other.pieceColour != pieceInfo.pieceColour && other.piecePosition == targetPosition)
-                {
-                    isCapturing = true;
-                    break;
-                }
-            }
-
-            validMove = (dx == 0 && (dy == 1 || (Mathf.Floor(oldPosition.y) == 1 && dy == 2))) ||
-                        (Mathf.Abs(dx) == 1 && dy == 1 && isCapturing);
-        }
-
-        else if (rules.IsBlackPawn())
-        {
-            bool isCapturing = false;
-            foreach (PieceInfo other in FindObjectsOfType<PieceInfo>())
-            {
-                if (other.pieceColour != pieceInfo.pieceColour && other.piecePosition == targetPosition)
-                {
-                    isCapturing = true;
-                    break;
-                }
-            }
-
-            validMove = (dx == 0 && (dy == -1 || (Mathf.Floor(oldPosition.y) == 6 && dy == -2))) ||
-                        (Mathf.Abs(dx) == 1 && dy == -1 && isCapturing);
-        }
-
-        else if (rules.IsKnight())
-        {
-            validMove = (Mathf.Abs(dx) == 2 && Mathf.Abs(dy) == 1) || (Mathf.Abs(dx) == 1 && Mathf.Abs(dy) == 2);
-        }
-        else if (rules.IsRook())
-        {
-            validMove = (dx == 0 && dy != 0) || (dy == 0 && dx != 0);
-        }
-        else if (rules.IsBishop())
-        {
-            validMove = Mathf.Abs(dx) == Mathf.Abs(dy);
-        }
-        else if (rules.IsQueen())
-        {
-            validMove = Mathf.Abs(dx) == Mathf.Abs(dy) || (dx == 0 && dy != 0) || (dy == 0 && dx != 0);
-        }
-        else if (rules.IsKing())
-        {
-            validMove = (Mathf.Abs(dx) <= 1 && Mathf.Abs(dy) <= 1 && (dx != 0 || dy != 0));
-        }
-
-        if (IsWhitesTurn && pieceInfo.pieceColour == "Black")
-        {
-            piece.transform.position = oldPosition;
-            return;
-        }
-        if (!IsWhitesTurn && pieceInfo.pieceColour == "White")
-        {
-            piece.transform.position = oldPosition;
-            return;
-        }
-
-        if (validMove && isBounded && !IsBlockingPiece(piece, targetPosition))
-        {
-            foreach (PieceInfo item in FindObjectsOfType<PieceInfo>())
-            {
-                if (item.piecePosition == targetPosition && item.pieceColour == pieceInfo.pieceColour)
-                {
-                    piece.transform.position = oldPosition;
-                    return;
-                }
-                else if (item.piecePosition == targetPosition && item.pieceColour != pieceInfo.pieceColour)
-                {
-                    Destroy(item.gameObject);
-                    allPiecesData.allPieces.Remove(item.gameObject);
-                    piece.transform.position = targetPosition;
-                    pieceInfo.piecePosition = targetPosition;
-                    IsWhitesTurn = !IsWhitesTurn;
-                    return;
-                }
-            }
-            piece.transform.position = targetPosition;
-            pieceInfo.piecePosition = targetPosition;
-            IsWhitesTurn = !IsWhitesTurn;
-        }
-        else
-        {
-            piece.transform.position = oldPosition;
-        }
-    }
-
-    public void ValidateAndMove(GameObject piece, Vector3 oldPosition)
-    {
-        Vector3 currentPos = piece.transform.position;
-        Rules rules = piece.GetComponent<Rules>();
-        PieceInfo pieceInfo = piece.GetComponent<PieceInfo>();
-        Vector3 targetPosition = new Vector3(Mathf.Floor(currentPos.x) + 0.5f, Mathf.Floor(currentPos.y) + 0.5f, currentPos.z);
-        bool validMove = true;
-        bool isBounded = true;
-
-
-
-        float dx = targetPosition.x - oldPosition.x;
-        float dy = targetPosition.y - oldPosition.y;
-
-        if (Mathf.Abs(targetPosition.x) <= (boardSize) / 2 && Mathf.Abs(targetPosition.y) <= (boardSize) / 2)
-        {
-            isBounded = true;
-        }
-        else
-        {
-            isBounded = false;
-        }
-
-        if (rules.IsWhitePawn())
-        {
-            bool isCapturing = false;
-            foreach (PieceInfo other in FindObjectsOfType<PieceInfo>())
-            {
-                if (other.pieceColour != pieceInfo.pieceColour && other.piecePosition == targetPosition)
-                {
-                    isCapturing = true;
-                    break;
-                }
-            }
-
-            validMove = (dx == 0 && (dy == 1 || (Mathf.Floor(oldPosition.y) == 1 && dy == 2))) ||
-                        (Mathf.Abs(dx) == 1 && dy == 1 && isCapturing);
-        }
-
-        else if (rules.IsBlackPawn())
-        {
-            bool isCapturing = false;
-            foreach (PieceInfo other in FindObjectsOfType<PieceInfo>())
-            {
-                if (other.pieceColour != pieceInfo.pieceColour && other.piecePosition == targetPosition)
-                {
-                    isCapturing = true;
-                    break;
-                }
-            }
-
-            validMove = (dx == 0 && (dy == -1 || (Mathf.Floor(oldPosition.y) == 6 && dy == -2))) ||
-                        (Mathf.Abs(dx) == 1 && dy == -1 && isCapturing);
-        }
-
-        else if (rules.IsKnight())
-        {
-            validMove = (Mathf.Abs(dx) == 2 && Mathf.Abs(dy) == 1) || (Mathf.Abs(dx) == 1 && Mathf.Abs(dy) == 2);
-        }
-        else if (rules.IsRook())
-        {
-            validMove = (dx == 0 && dy != 0) || (dy == 0 && dx != 0);
-        }
-        else if (rules.IsBishop())
-        {
-            validMove = Mathf.Abs(dx) == Mathf.Abs(dy);
-        }
-        else if (rules.IsQueen())
-        {
-            validMove = Mathf.Abs(dx) == Mathf.Abs(dy) || (dx == 0 && dy != 0) || (dy == 0 && dx != 0);
-        }
-        else if (rules.IsKing())
-        {
-            validMove = (Mathf.Abs(dx) <= 1 && Mathf.Abs(dy) <= 1 && (dx != 0 || dy != 0));
-        }
-
-        if (IsWhitesTurn && pieceInfo.pieceColour == "Black")
-        {
-            piece.transform.position = oldPosition;
-            return;
-        }
-        if (!IsWhitesTurn && pieceInfo.pieceColour == "White")
-        {
-            piece.transform.position = oldPosition;
-            return;
-        }
-
-        if (validMove && isBounded && !IsBlockingPiece(piece, targetPosition))
-        {
-            foreach (PieceInfo item in FindObjectsOfType<PieceInfo>())
-            {
-                if (item.piecePosition == targetPosition && item.pieceColour == pieceInfo.pieceColour)
-                {
-                    piece.transform.position = oldPosition;
-                    return;
-                }
-                else if (item.piecePosition == targetPosition && item.pieceColour != pieceInfo.pieceColour)
-                {
-                    Destroy(item.gameObject);
-                    allPiecesData.allPieces.Remove(item.gameObject);
-                    piece.transform.position = targetPosition;
-                    pieceInfo.piecePosition = targetPosition;
-                    IsWhitesTurn = !IsWhitesTurn;
-                    return;
-                }
-            }
-            piece.transform.position = targetPosition;
-            pieceInfo.piecePosition = targetPosition;
-            IsWhitesTurn = !IsWhitesTurn;
-        }
-        else
-        {
-            piece.transform.position = oldPosition;
-        }
-    }
-
-    bool IsBlockingPiece(GameObject piece, Vector3 targetPosition)
-    {
-        Vector3 start = piece.GetComponent<PieceInfo>().piecePosition;
-        float dx = targetPosition.x - start.x;
-        float dy = targetPosition.y - start.y;
-
-        int stepX = dx == 0 ? 0 : (int)Mathf.Sign(dx);
-        int stepY = dy == 0 ? 0 : (int)Mathf.Sign(dy);
-
-        int steps = (int)Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy));
-
-        if (piece.GetComponent<Rules>().IsKnight()) return false;
-
-        for (int i = 1; i < steps; i++)
-        {
-            Vector3 checkPos = new Vector3(
-                start.x + stepX * i,
-                start.y + stepY * i,
-                start.z
-            );
-
-            foreach (PieceInfo other in FindObjectsOfType<PieceInfo>())
-            {
-                if (other.piecePosition == checkPos)
-                {
-                    return true;
-                }
-            }
-        }
+        if (rules.IsKing())
+            return Mathf.Abs(dx) <= 1 && Mathf.Abs(dy) <= 1;
 
         return false;
     }
 
+    bool IsBlocked(GameObject piece, Vector3 from, Vector3 to)
+    {
+        Debug.Log($"Checking if move is blocked from {from} to {to}");
+        Rules rules = piece.GetComponent<Rules>();
+        if (rules.IsKnight()) return false; // Knights are never blocked
+
+        Vector3 direction = (to - from).normalized; // Find the direction of the move
+        float distance = Mathf.Max(Mathf.Abs(to.x - from.x), Mathf.Abs(to.y - from.y)); // Max distance in either x or y
+
+        // Check every step along the way from the start to the end
+        for (int i = 1; i < distance; i++)
+        {
+            // Move step-by-step along the direction vector
+            Vector3 checkPos = from + direction * i;
+            checkPos = new Vector3(Mathf.Round(checkPos.x), Mathf.Round(checkPos.y), 0); // Round to grid
+
+            if (IsPieceAt(checkPos)) // Check if there's a piece in the way
+            {
+                Debug.Log($"Blocked at {checkPos}");
+                return true; // Path is blocked
+            }
+        }
+        return false; // No blocking piece found
+    }
+
+    bool WouldCauseCheck(GameObject piece, Vector3 from, Vector3 to)
+    {
+        PieceInfo pieceInfo = piece.GetComponent<PieceInfo>();
+        Vector3 originalPos = pieceInfo.piecePosition;
+        Vector3 tempPos = piece.transform.position;
+
+        // Simulate move
+        piece.transform.position = to;
+        pieceInfo.piecePosition = to;
+
+        bool kingInCheck = IsKingUnderAttack(pieceInfo.pieceColour);
+
+        // Undo move
+        piece.transform.position = tempPos;
+        pieceInfo.piecePosition = originalPos;
+
+        return kingInCheck;
+    }
+
+    bool IsKingUnderAttack(string color)
+    {
+        Vector3 kingPos = Vector3.zero;
+        foreach (PieceInfo piece in FindObjectsOfType<PieceInfo>())
+        {
+            if (piece.pieceColour == color && piece.GetComponent<Rules>().IsKing())
+            {
+                kingPos = piece.piecePosition;
+                break;
+            }
+        }
+
+        foreach (PieceInfo piece in FindObjectsOfType<PieceInfo>())
+        {
+            if (piece.pieceColour != color)
+            {
+                if (IsValidAttack(piece.gameObject, piece.piecePosition, kingPos))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    bool IsValidAttack(GameObject piece, Vector3 fromPos, Vector3 toPos)
+    {
+        if (!MoveRules(piece, fromPos, toPos)) return false;
+        if (IsBlocked(piece, fromPos, toPos)) return false;
+        if (IsFriendlyAt(toPos, piece.GetComponent<PieceInfo>().pieceColour)) return false;
+        return true;
+    }
+
+    public void ValidateAndMove(GameObject piece, Vector3 oldPos, Vector3 newPos)
+    {
+        if (!IsValidMove(piece, oldPos, newPos))
+            return;
+
+        foreach (PieceInfo other in FindObjectsOfType<PieceInfo>())
+        {
+            if (Vector3.Distance(other.piecePosition, newPos) < 0.1f)
+            {
+                Destroy(other.gameObject);
+                allPiecesData.allPieces.Remove(other.gameObject);
+                break;
+            }
+        }
+
+        piece.transform.position = newPos;
+        piece.GetComponent<PieceInfo>().piecePosition = newPos;
+
+        if (IsKingUnderAttack(IsWhitesTurn ? "Black" : "White"))
+        {
+            Debug.Log("Checkmate! Game Over");
+            IsGameOver = true;
+        }
+
+        IsWhitesTurn = !IsWhitesTurn;
+    }
+
+    bool IsCheckmate(string color)
+    {
+        foreach (PieceInfo piece in FindObjectsOfType<PieceInfo>())
+        {
+            if (piece.pieceColour == color)
+            {
+                foreach (SquareInfo square in FindObjectsOfType<SquareInfo>())
+                {
+                    if (IsValidMove(piece.gameObject, piece.piecePosition, square.transform.position))
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    bool IsPieceAt(Vector3 position)
+    {
+        foreach (PieceInfo piece in FindObjectsOfType<PieceInfo>())
+        {
+            if (Vector3.Distance(piece.piecePosition, position) < 0.1f)
+                return true;
+        }
+        return false;
+    }
+
+    bool IsEnemyAt(Vector3 position, string ownColor)
+    {
+        foreach (PieceInfo piece in FindObjectsOfType<PieceInfo>())
+        {
+            if (Vector3.Distance(piece.piecePosition, position) < 0.1f && piece.pieceColour != ownColor)
+                return true;
+        }
+        return false;
+    }
+
+    bool IsFriendlyAt(Vector3 position, string ownColor)
+    {
+        foreach (PieceInfo piece in FindObjectsOfType<PieceInfo>())
+        {
+            if (Vector3.Distance(piece.piecePosition, position) < 0.1f && piece.pieceColour == ownColor)
+                return true;
+        }
+        return false;
+    }
+
+    bool IsInsideBoard(Vector3 pos)
+    {
+        return Mathf.Abs(pos.x) <= (boardSize / 2) && Mathf.Abs(pos.y) <= (boardSize / 2);
+    }
 }
